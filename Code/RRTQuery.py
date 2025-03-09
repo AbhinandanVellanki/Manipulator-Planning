@@ -101,30 +101,25 @@ def RRTQuery():
     global rrtVertices
     global rrtEdges 
     
-    goal_bias = 0.5
+    goal_bias = 0.2 # probability of sampling q_goal
     del_q = 0.1 # max distance to move towards q_r
     final_connect_threshold = 0.1 # how close does current vertex have to be to the goal to connect directly
     
     while len(rrtVertices)<3000 and not FoundSolution:
         # TODO: - Implement RRT algorithm to find a path to the goal configuration
         # Use the global rrtVertices, rrtEdges, plan and FoundSolution variables in your algorithm
-        print("Iteration: ", len(rrtVertices))
         
         # sample q_goal with probability goal_bias
         if np.random.rand() < goal_bias:
             q_r = qGoal
-            print("sampled goal point")
         else:
             q_r = mybot.SampleRobotConfig()
-            print("sampled random point")
             
         # get nearest vertex to q_r from rrtVertices
         q_near = rrtVertices[FindNearest(rrtVertices, q_r)]
-        print("got nearest neighbor, connecting it to the sampled point...")
         
         q_c = q_near
         while np.linalg.norm(np.array(q_c) - np.array(q_r)) != 0:
-            print("remaining distance to sampled point: ", np.linalg.norm(np.array(q_c) - np.array(q_r)))
             # get new vertex q_new by moving from q_near towards q_r by max del_q
             diff = np.array(q_r) - np.array(q_c)
             direction = diff/np.linalg.norm(diff)
@@ -133,31 +128,32 @@ def RRTQuery():
             
             # check if edge from q_n to q_c is in collision
             if mybot.DetectCollisionEdge(q_near, q_c, pointsObs, axesObs):
-                print("collision detected! breaking")
                 break
             
             if mybot.DetectCollision(q_c, pointsObs, axesObs):
-                print("collision detected! breaking")
                 break
             
-            # no collisions, add vertex and edge
+            # no collisions, add vertex to rrtVertices and parent index to rrtEdges
             rrtVertices.append(q_c)
-            rrtEdges.append(q_near)
+            for i in range(len(rrtVertices)):
+                if np.all(rrtVertices[i] == q_near):
+                    rrtEdges.append(i)
+                    break
             
             # try to connect to goal
             if np.linalg.norm(np.array(q_c) - np.array(qGoal)) < final_connect_threshold:
-                print("connecting to goal point!")
                 # goal reached
                 rrtVertices.append(qGoal)
-                rrtEdges.append(q_c)
+                for i in range(len(rrtVertices)):
+                    if np.all(rrtVertices[i] == q_c):
+                        rrtEdges.append(i)
+                        break
                 FoundSolution = True
                 break
             
             # update q_near
             q_near = q_c
         
-        print("connected to sampled point, moving on to next iteration")
-
     ### if a solution was found
     if FoundSolution:
         # Extract path
