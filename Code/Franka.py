@@ -241,11 +241,7 @@ class FrankArm:
         
         # Note: you can use rt.BlockDesc2Points to get the cpoints and axes for each collision block
         for i, link in enumerate(self.Cidx):
-            if self.Cidx[i] == 0:
-                self.Tcoll[i] = self.Tcurr[link] @ self.Tblock[i]
-            else:
-                self.Tcoll[i] = self.Tcurr[link - 1] @ self.Tblock[i]
-                
+            self.Tcoll[i] = self.Tcurr[link - 1] @ self.Tblock[i]
             self.Cpoints[i], self.Caxes[i] = rt.BlockDesc2Points(self.Tcoll[i], self.Cdim[i])
         
     def DetectCollision(self, ang, pointsObs, axesObs):		

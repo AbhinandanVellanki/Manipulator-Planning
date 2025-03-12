@@ -101,12 +101,12 @@ def RRTQuery():
     global rrtVertices
     global rrtEdges 
     
-    goal_bias = 0.2 # probability of sampling q_goal
-    del_q = 0.1 # max distance to move towards q_r
+    goal_bias = 0.1 # probability of sampling q_goal
+    del_q = 0.2 # max distance to move towards q_r
     final_connect_threshold = 0.1 # how close does current vertex have to be to the goal to connect directly
     
     while len(rrtVertices)<3000 and not FoundSolution:
-        # TODO: - Implement RRT algorithm to find a path to the goal configuration
+        # RRT algorithm to find a path to the goal configuration
         # Use the global rrtVertices, rrtEdges, plan and FoundSolution variables in your algorithm
         
         # sample q_goal with probability goal_bias
@@ -116,7 +116,8 @@ def RRTQuery():
             q_r = mybot.SampleRobotConfig()
             
         # get nearest vertex to q_r from rrtVertices
-        q_near = rrtVertices[FindNearest(rrtVertices, q_r)]
+        q_near_index = FindNearest(rrtVertices, q_r)
+        q_near = rrtVertices[q_near_index]
         
         q_c = q_near
         while np.linalg.norm(np.array(q_c) - np.array(q_r)) != 0:
@@ -135,24 +136,28 @@ def RRTQuery():
             
             # no collisions, add vertex to rrtVertices and parent index to rrtEdges
             rrtVertices.append(q_c)
-            for i in range(len(rrtVertices)):
-                if np.all(rrtVertices[i] == q_near):
-                    rrtEdges.append(i)
-                    break
-            
-            # try to connect to goal
-            if np.linalg.norm(np.array(q_c) - np.array(qGoal)) < final_connect_threshold:
-                # goal reached
-                rrtVertices.append(qGoal)
-                for i in range(len(rrtVertices)):
-                    if np.all(rrtVertices[i] == q_c):
-                        rrtEdges.append(i)
-                        break
-                FoundSolution = True
-                break
+            # for i in range(len(rrtVertices)):
+            #     if np.all(rrtVertices[i] == q_near):
+            #         rrtEdges.append(i)
+            #         break
+            rrtEdges.append(q_near_index)
             
             # update q_near
             q_near = q_c
+            q_near_index = len(rrtVertices) - 1
+
+            # try to connect to goal
+            if np.linalg.norm(np.array(q_c) - np.array(qGoal)) < final_connect_threshold and not mybot.DetectCollisionEdge(q_c, qGoal, pointsObs, axesObs):
+                # goal reached
+                rrtVertices.append(qGoal)
+                # for i in range(len(rrtVertices)):
+                #     if np.all(rrtVertices[i] == q_c):
+                #         rrtEdges.append(i)
+                #         break
+                rrtEdges.append(q_near_index)
+                FoundSolution = True
+                break
+             
         
     ### if a solution was found
     if FoundSolution:
@@ -167,18 +172,17 @@ def RRTQuery():
                 break
 
         #Path shortening
-        for i in range(150):
-            # sample two points, one closer to the start than the other
-            a = np.random.randint(0,len(plan)-1)
-            b = np.random.randint(a+1,len(plan))
+        # for i in range(150):
+        #     # sample two points, one closer to the start than the other
+        #     a = np.random.randint(0,len(plan)-1)
+        #     b = np.random.randint(a+1,len(plan))
             
-            # check if edge from a to b is in collision
-            if mybot.DetectCollisionEdge(plan[a], plan[b], pointsObs, axesObs):
-                continue
+        #     # check if edge from a to b is in collision
+        #     if mybot.DetectCollisionEdge(plan[a], plan[b], pointsObs, axesObs):
+        #         continue
             
-            # add a and b to plan and remove points between them
-            plan = plan[:a+1] + [plan[b]] + plan[b+1:]        
-            
+        #     # add a and b to plan and remove points between them
+        #     plan = plan[:a+1] + [plan[b]] + plan[b+1:]        
     
         for (i, q) in enumerate(plan):
             print("Plan step: ", i, "and joint: ", q)
