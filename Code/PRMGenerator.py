@@ -73,16 +73,16 @@ def PRMGenerator():
         prmEdges.append([])
         
         # find nearest neighbors by iterating through all vertices and checking distance
-        # for i in range(len(prmVertices)):
-        #     if np.linalg.norm(np.array(q_new) - np.array(prmVertices[i])) <= 2:
-        #         # point should be different from the neighbor
-        #         if np.array_equal(q_new, prmVertices[i]):
-        #             continue
-        #         # neighbor found
-        #         # check for edge collision
-        #         if not mybot.DetectCollisionEdge(q_new, prmVertices[i], pointsObs, axesObs):
-        #             prmEdges[-1].append(i)
-        #             prmEdges[i].append(len(prmVertices)-1)
+        for i in range(len(prmVertices)):
+            if np.linalg.norm(np.array(q_new) - np.array(prmVertices[i])) <= 2:
+                # point should be different from the neighbor
+                if np.array_equal(q_new, prmVertices[i]):
+                    continue
+                # neighbor found
+                # check for edge collision
+                if not mybot.DetectCollisionEdge(q_new, prmVertices[i], pointsObs, axesObs):
+                    prmEdges[-1].append(i)
+                    prmEdges[i].append(len(prmVertices)-1)
         
         # connect vertes to all edges
                     
