@@ -83,10 +83,6 @@ def PRMGenerator():
                 if not mybot.DetectCollisionEdge(q_new, prmVertices[i], pointsObs, axesObs):
                     prmEdges[-1].append(i)
                     prmEdges[i].append(len(prmVertices)-1)
-        
-        # connect vertes to all edges
-                    
-                    # print("Edge added between ", q_new, " and ", prmVertices[i])
     
     #Save the PRM such that it can be run by PRMQuery.py
     f = open("myPRM.p", 'wb')
