@@ -172,17 +172,17 @@ def RRTQuery():
                 break
 
         #Path shortening
-        # for i in range(150):
-        #     # sample two points, one closer to the start than the other
-        #     a = np.random.randint(0,len(plan)-1)
-        #     b = np.random.randint(a+1,len(plan))
+        for i in range(150):
+            # sample two points, one closer to the start than the other
+            a = np.random.randint(0,len(plan)-1)
+            b = np.random.randint(a+1,len(plan))
             
-        #     # check if edge from a to b is in collision
-        #     if mybot.DetectCollisionEdge(plan[a], plan[b], pointsObs, axesObs):
-        #         continue
+            # check if edge from a to b is in collision
+            if mybot.DetectCollisionEdge(plan[a], plan[b], pointsObs, axesObs):
+                continue
             
-        #     # add a and b to plan and remove points between them
-        #     plan = plan[:a+1] + [plan[b]] + plan[b+1:]        
+            # add a and b to plan and remove points between them
+            plan = plan[:a+1] + [plan[b]] + plan[b+1:]        
     
         for (i, q) in enumerate(plan):
             print("Plan step: ", i, "and joint: ", q)
