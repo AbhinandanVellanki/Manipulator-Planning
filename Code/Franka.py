@@ -230,6 +230,7 @@ class FrankArm:
         for i in range(7):
             q.append(self.qmin[i]+(self.qmax[i]-self.qmin[i])*random.random())
         return q
+    
 
     def CompCollisionBlockPoints(self,ang):
         self.ForwardKin(ang)

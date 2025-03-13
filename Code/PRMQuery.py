@@ -87,33 +87,49 @@ def PRMQuery():
     for i in range(len(prmVertices)):
         if np.linalg.norm(np.array(prmVertices[i])-np.array(qInit))<2.:
             if not mybot.DetectCollisionEdge(prmVertices[i], qInit, pointsObs, axesObs):
+                # add neighbors of initial node
+                print(f"Adding {i} to neighInit")   
                 neighInit.append(i)
 
         if np.linalg.norm(np.array(prmVertices[i])-np.array(qGoal))<2.:
             if not mybot.DetectCollisionEdge(prmVertices[i], qGoal, pointsObs, axesObs):
+                # add neighbors of goal node
+                print(f"Adding {i} to neighGoal")
                 neighGoal.append(i)
 
+        # calculate heuristic for each node
         heuristic.append(np.linalg.norm(np.array(prmVertices[i])-np.array(qGoal)))
         parent.append([])
 
 
-    activenodes= neighInit
+    activenodes= neighInit # active nodes is the path. Start with the initial node
     bestscore=0
+    
+    print("activenodes: ", activenodes)
+    print(f"prmEdges at {activenodes[0]}: {prmEdges[activenodes[0]]}")   
+    print(f"prmEdges at {activenodes[1]}: {prmEdges[activenodes[1]]}")   
+
 
     while bestscore<1000 and not any([g in activenodes for g in neighGoal]):
+        # while the best score is less than 1000 and the path does not contain the goal node's neighbors
 
         bestscore = 1000
 
+        # add nodes to the active nodes
         for i in range(len(activenodes)):
+            # for current node in active nodes
             for j in range(len(prmEdges[activenodes[i]])):
+                # for current neighbor of the current node
                 if prmEdges[activenodes[i]][j] not in activenodes:
+                    # if the current neighbor of the current node is not in the active nodes
                     if heuristic[prmEdges[activenodes[i]][j]]<bestscore:
+                        # if heuristic of the current neighbors of the current node is less than the best score 
                         bestscore=heuristic[prmEdges[activenodes[i]][j]]
-                        bestcandi=prmEdges[activenodes[i]][j]
-                        bestparent=activenodes[i]
+                        bestcandi=prmEdges[activenodes[i]][j] # best candidate for the next node in the active nodes
+                        bestparent=activenodes[i] 
 
-        if bestscore<1000:
-            activenodes.append(bestcandi)
+        if bestscore<1000: # if a best candidate is found
+            activenodes.append(bestcandi) # add the best candidate to the active nodes
             parent[bestcandi]= bestparent
 
 

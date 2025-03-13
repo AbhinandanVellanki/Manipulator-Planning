@@ -46,10 +46,48 @@ def PRMGenerator():
     pointsObs = np.array(pointsObs)
     axesObs = np.array(axesObs)
     
+    prob_uniform = 0.5
+    prob_gaussian = 0.2
+    prob_bridge = 0.3
+    
     while len(prmVertices)<1000:
-        # sample random poses
-        print(len(prmVertices))
-
+        
+       # sample next configuration
+        if len(prmVertices) < 2 or random.random() < prob_uniform:
+            q_new = mybot.SampleRobotConfig()
+        elif random.random() < prob_gaussian:
+            q_new = SampleRobotConfigGaussian(prmVertices)
+        else:
+            q_new = SampleRobotConfigBridge(prmVertices)
+        
+        q_new = mybot.SampleRobotConfig()
+        
+        # collision checking
+        if mybot.DetectCollision(q_new, pointsObs, axesObs):
+            continue
+        
+        # append vertex to graph
+        prmVertices.append(q_new)
+        print("Vertex added: ", q_new)
+        # append empty list for edges of this vertex
+        prmEdges.append([])
+        
+        # find nearest neighbors by iterating through all vertices and checking distance
+        # for i in range(len(prmVertices)):
+        #     if np.linalg.norm(np.array(q_new) - np.array(prmVertices[i])) <= 2:
+        #         # point should be different from the neighbor
+        #         if np.array_equal(q_new, prmVertices[i]):
+        #             continue
+        #         # neighbor found
+        #         # check for edge collision
+        #         if not mybot.DetectCollisionEdge(q_new, prmVertices[i], pointsObs, axesObs):
+        #             prmEdges[-1].append(i)
+        #             prmEdges[i].append(len(prmVertices)-1)
+        
+        # connect vertes to all edges
+                    
+                    # print("Edge added between ", q_new, " and ", prmVertices[i])
+    
     #Save the PRM such that it can be run by PRMQuery.py
     f = open("myPRM.p", 'wb')
     pickle.dump(prmVertices, f)
@@ -57,6 +95,46 @@ def PRMGenerator():
     pickle.dump(pointsObs, f)
     pickle.dump(axesObs, f)
     f.close
+    
+def SampleRobotConfigGaussian(prmVertices, std_dev=0.1):
+    # Select a random node
+    node_idx = random.randint(0, len(prmVertices) - 1)
+    node = prmVertices[node_idx]
+    
+    # Perturb the node using Gaussian noise
+    noise = np.random.normal(0, std_dev, size=len(node))
+    new_sample = node + noise
+    
+    # Ensure the new sample is within joint limits
+    new_sample = np.clip(new_sample, mybot.qmin, mybot.qmax)
+    
+    return new_sample
+
+def SampleRobotConfigBridge(prmVertices):
+    new_samples = []
+    # Select two random nodes
+    
+    while True:
+        node1_idx = random.randint(0, len(prmVertices) - 1)
+        node2_idx = random.randint(0, len(prmVertices) - 1)
+        
+        if not node1_idx == node2_idx:
+                break
+    
+    node1 = prmVertices[node1_idx]
+    node2 = prmVertices[node2_idx]
+    
+    # Generate intermediate sample between the two nodes 
+    diff = (np.array(node2) - np.array(node1)) 
+    direction = diff / np.linalg.norm(diff)
+    sample = node1 + direction * 0.5 * np.linalg.norm(diff)
+        
+    
+    # Ensure the sample is within joint limits
+    sample = np.clip(sample, mybot.qmin, mybot.qmax)
+    
+    if not mybot.DetectCollision(sample, pointsObs, axesObs):
+        return sample
 
 if __name__ == "__main__":
 
