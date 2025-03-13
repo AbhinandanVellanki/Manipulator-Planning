@@ -127,8 +127,7 @@ def SampleRobotConfigBridge(prmVertices):
     # Ensure the sample is within joint limits
     sample = np.clip(sample, mybot.qmin, mybot.qmax)
     
-    if not mybot.DetectCollision(sample, pointsObs, axesObs):
-        return sample
+    return sample
 
 if __name__ == "__main__":
 
