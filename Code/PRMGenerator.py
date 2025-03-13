@@ -68,7 +68,7 @@ def PRMGenerator():
         
         # append vertex to graph
         prmVertices.append(q_new)
-        print("Vertex added: ", q_new)
+        # print("Vertex added: ", q_new)
         # append empty list for edges of this vertex
         prmEdges.append([])
         
@@ -107,9 +107,7 @@ def SampleRobotConfigGaussian(prmVertices, std_dev=0.1):
     return new_sample
 
 def SampleRobotConfigBridge(prmVertices):
-    new_samples = []
     # Select two random nodes
-    
     while True:
         node1_idx = random.randint(0, len(prmVertices) - 1)
         node2_idx = random.randint(0, len(prmVertices) - 1)
