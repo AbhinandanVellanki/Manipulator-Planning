@@ -136,10 +136,6 @@ def RRTQuery():
             
             # no collisions, add vertex to rrtVertices and parent index to rrtEdges
             rrtVertices.append(q_c)
-            # for i in range(len(rrtVertices)):
-            #     if np.all(rrtVertices[i] == q_near):
-            #         rrtEdges.append(i)
-            #         break
             rrtEdges.append(q_near_index)
             
             # update q_near
@@ -150,10 +146,6 @@ def RRTQuery():
             if np.linalg.norm(np.array(q_c) - np.array(qGoal)) < final_connect_threshold and not mybot.DetectCollisionEdge(q_c, qGoal, pointsObs, axesObs):
                 # goal reached
                 rrtVertices.append(qGoal)
-                # for i in range(len(rrtVertices)):
-                #     if np.all(rrtVertices[i] == q_c):
-                #         rrtEdges.append(i)
-                #         break
                 rrtEdges.append(q_near_index)
                 FoundSolution = True
                 break
