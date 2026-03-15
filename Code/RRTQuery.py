@@ -12,8 +12,12 @@ from mujoco import viewer
 # Seed the random object
 seed(10)
 
+# add path of parent directory to import xml files
+import sys
+sys.path.append('../')
+
 # Open the simulator model from the MJCF file
-xml_filepath = "../franka_emika_panda/panda_with_hand_torque.xml"
+xml_filepath = "/Users/abhi/Documents/CMU/2025-26/Sem2_L/Autonomy/Assignments/16_662_HW2/franka_emika_panda/panda_with_hand_torque.xml"
 
 np.random.seed(0)
 deg_to_rad = np.pi/180.
@@ -206,7 +210,7 @@ def position_control(model, data):
         # If a plan is available, cycle through poses
         plan_length = interpolated_plan.shape[0]
 
-        if np.linalg.norm(interpolated_plan[joint_counter] - data.qpos[:7]) < 0.01 and joint_counter < plan_length:
+        if np.linalg.norm(interpolated_plan[joint_counter] - data.qpos[:7]) < 0.01 and joint_counter < plan_length - 1:
             joint_counter+=inc
 
         desired_joint_positions = interpolated_plan[joint_counter]
@@ -247,4 +251,8 @@ if __name__ == "__main__":
     RRTQuery()
 
     # Launch the simulate viewer
-    viewer.launch(model, data)
+    with viewer.launch_passive(model, data) as v:
+        while v.is_running():
+            for _ in range(10):
+                mj.mj_step(model, data)
+            v.sync()

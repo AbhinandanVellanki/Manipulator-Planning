@@ -106,8 +106,6 @@ def PRMQuery():
     bestscore=0
     
     print("activenodes: ", activenodes)
-    print(f"prmEdges at {activenodes[0]}: {prmEdges[activenodes[0]]}")   
-    print(f"prmEdges at {activenodes[1]}: {prmEdges[activenodes[1]]}")   
 
 
     while bestscore<1000 and not any([g in activenodes for g in neighGoal]):
@@ -209,4 +207,8 @@ if __name__ == "__main__":
     PRMQuery()
 
     # Launch the simulate viewer
-    viewer.launch(model, data)
+    with viewer.launch_passive(model, data) as v:
+        while v.is_running():
+            for _ in range(10):
+                mj.mj_step(model, data)
+            v.sync()
